@@ -10,10 +10,11 @@
 
 using namespace std;
 
-class Availability_Slots{
-    public:
-        int start_time;
-        int end_time;
+class Availability_Slots
+{
+public:
+    int start_time;
+    int end_time;
 };
 
 class Member
@@ -25,16 +26,19 @@ public:
     int p_copy;
 };
 
-class Family{
-    public:
+class Family
+{
+public:
     vector<Member> family_members;
 
-    Family(string datafile){
+    Family(string datafile)
+    {
         ifstream data(datafile);
         string temp;
 
-        while(getline(data,temp)){
-            
+        while (getline(data, temp))
+        {
+
             istringstream iss(temp);
             string name;
             iss >> name;
@@ -44,8 +48,8 @@ class Family{
             string series;
             int no_of_fav_series;
             iss >> no_of_fav_series;
-            
-            while (no_of_fav_series>0 && iss>>series)
+
+            while (no_of_fav_series > 0 && iss >> series)
             {
                 m.favorite_shows.push_back(series);
                 no_of_fav_series--;
@@ -60,22 +64,25 @@ class Family{
             m.p_copy = 0;
             family_members.push_back(m);
         }
-            data.close();
+        data.close();
     }
 };
 
-class Show{
-    public:
-        list <string> member_list;
-        string name;
+class Show
+{
+public:
+    list<string> member_list;
+    string name;
 };
 
-class TV_Channel{
-    public:
+class TV_Channel
+{
+public:
     vector<Show> show_list;
 
-    void setdata(string datafile, Family fam){
-        
+    void setdata(string datafile, Family fam)
+    {
+
         ifstream data(datafile);
         string temp;
 
@@ -84,79 +91,127 @@ class TV_Channel{
             Show s;
             s.name = temp;
 
-            for ( auto it : fam.family_members)
+            for (auto it : fam.family_members)
             {
                 for (auto it1 : it.favorite_shows)
                 {
-                    if(s.name == it1){
+                    if (s.name == it1)
+                    {
                         s.member_list.push_back(it.name);
                     }
                 }
-                
             }
 
             show_list.push_back(s);
         }
-        
+
         data.close();
     }
 };
 
-class Scheduler{
-    public:
-        multimap<int, pair<string,string>> Schedule;
+class Scheduler
+{
+public:
+    multimap<int, pair<string, string>> Schedule;
 
-        Scheduler(Family fam, TV_Channel channel){
-            for (int i = 0; i < 23; i++)
+    Scheduler(Family fam, TV_Channel channel)
+    {
+        for (int i = 0; i < 24; i++)
+        {
+            vector<Member *> free;
+
+            for (auto &it_member : fam.family_members)
             {
-                vector<Member> free;
-
-                for(auto& it_member : fam.family_members)
+                for (auto it_available : it_member.availabilty)
                 {
-                    for(auto it_available : it_member.availabilty)
+                    if (it_available.start_time == i)
                     {
-                        if(it_available.start_time = i){
-                            free.push_back(it_member);
-                        }
+                        free.push_back(&it_member);
                     }
-                }
-                
-                if(free.size()==0){
-                    continue;
-                }
-                else if(free.size()==1){
-                    for(auto it : channel.show_list)
-                    {
-                        if((it.member_list.size()==1)&&(it.member_list.front()==free[0].name)){
-                            pair<string, string> data = make_pair(free[0].name, it.name);
-                            Schedule.insert({i, data});
-                        } 
-                    }
-                    
-                }
-                else if(free.size()>1){
-
                 }
             }
-            
+
+            if (free.size() == 0)
+            {
+                continue;
+            }
+            else if (free.size() == 1)
+            {
+                for (auto &it : channel.show_list)
+                {
+                    if ((it.member_list.size() == 1) && (it.member_list.front() == free[0]->name))
+                    {
+                        pair<string, string> data = make_pair(free[0]->name, it.name);
+                        Schedule.insert({i, data});
+                        it.member_list.pop_front();
+                        free[0]->p_copy++;
+                        break;
+                    }
+                }
+            }
+            else if (free.size() > 1)
+            {
+               
+                Member *temp = free[0];
+
+                for (auto &it2 : free)
+                {
+                    if (temp->p_copy >= it2->p_copy)
+                    {
+                        temp = it2;
+                    }
+                }
+
+                for (auto &it : channel.show_list)
+                {
+                    int j = 0;
+
+                    for (auto &it3 : it.member_list)
+                    {
+                        if ((it3 == temp->name))
+                        {
+                            pair<string, string> data = make_pair(temp->name, it.name);
+                            Schedule.insert({i, data});
+                            temp->p_copy++;
+                            it.member_list.remove(it3);
+                            j = 1;
+                            break;
+                        }
+                    }
+                    if (j == 1)
+                    {
+                        break;
+                    }
+                }
+            }
         }
+    }
 };
 
-int main(){
+int main()
+{
 
     Family American("Members.txt");
-    
-    cout << American.family_members[1].availabilty[0].start_time<<endl;
+
+    cout << American.family_members[1].availabilty[0].start_time << endl;
 
     TV_Channel Sony;
     Sony.setdata("Shows.txt", American);
 
-    cout<<Sony.show_list[0].name<<endl;
+    cout << Sony.show_list[0].name << endl;
 
-    for(auto it = Sony.show_list[0].member_list.begin(); it!=Sony.show_list[0].member_list.end(); ++it){
-        cout<<*it<<" ";
+    for (auto it = Sony.show_list[0].member_list.begin(); it != Sony.show_list[0].member_list.end(); ++it)
+    {
+        cout << *it << " ";
     }
-    cout<<endl;
+    cout << endl;
 
+    Scheduler schedule(American, Sony);
+
+    for (auto it : schedule.Schedule)
+    {
+        cout << it.first << " " << it.second.first << " " << it.second.second << endl;
+    }
+    
     return 0;
 }
