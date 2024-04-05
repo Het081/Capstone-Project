@@ -118,7 +118,7 @@ public:
     {
         for (int i = 0; i < 24; i++)
         {
-            vector<Member> free;
+            vector<Member *> free;
 
             for (auto &it_member : fam.family_members)
             {
@@ -126,7 +126,7 @@ public:
                 {
                     if (it_available.start_time == i)
                     {
-                        free.push_back(it_member);
+                        free.push_back(&it_member);
                     }
                 }
             }
@@ -139,18 +139,19 @@ public:
             {
                 for (auto &it : channel.show_list)
                 {
-                    if ((it.member_list.size() == 1) && (it.member_list.front() == free[0].name))
+                    if ((it.member_list.size() == 1) && (it.member_list.front() == free[0]->name))
                     {
-                        pair<string, string> data = make_pair(free[0].name, it.name);
+                        pair<string, string> data = make_pair(free[0]->name, it.name);
                         Schedule.insert({i, data});
                         it.member_list.pop_front();
-                        free[0].p_copy++;
+                        free[0]->p_copy++;
                         break;
                     }
                 }
             }
-            /*else if(free.size()>1){
-                for(int i=0; i<free.size(); i++)
+            else if (free.size() > 1)
+            {
+                /*for(int i=0; i<free.size(); i++)
                 {
                     int count = 0;
                     string common;
@@ -163,6 +164,38 @@ public:
                         }
                     }
                 }*/
+                Member *temp = free[0];
+
+                for (auto &it2 : free)
+                {
+                    if (temp->p_copy >= it2->p_copy)
+                    {
+                        temp = it2;
+                    }
+                }
+
+                for (auto &it : channel.show_list)
+                {
+                    int j = 0;
+
+                    for (auto &it3 : it.member_list)
+                    {
+                        if ((it3 == temp->name))
+                        {
+                            pair<string, string> data = make_pair(temp->name, it.name);
+                            Schedule.insert({i, data});
+                            temp->p_copy++;
+                            it.member_list.remove(it3);
+                            j = 1;
+                            break;
+                        }
+                    }
+                    if (j == 1)
+                    {
+                        break;
+                    }
+                }
+            }
         }
     }
 };
@@ -189,7 +222,7 @@ int main()
 
     for (auto it : schedule.Schedule)
     {
-        cout<<it.first<<" "<<it.second.first<<" "<<it.second.second<< endl;
+        cout << it.first << " " << it.second.first << " " << it.second.second << endl;
     }
     /*Sony.show_list[1].member_list.pop_front();
     cout<<Sony.show_list[1].member_list.front();
