@@ -93,11 +93,11 @@ Aayush: Contributed in writing all the part of the code where the data was to be
 Example of the Solution:
 
 INPUT:
-    Members File:
-        Jack 7 Narcos Lucifer Breaking_Bad Game_of_thrones Teen_wolf Legacies Stranger_things 8 9 12 13 16 17 20 21 22 23 
-        BOB 5 Game_of_thrones House_of_the_dragon Teen_wolf Legacies Breaking_Bad 4 5 8 9 10 11 16 17 18 19 20 21
-        Tessa 3 Lucifer Narcos Lost_in_space 6 7 12 13 15 16 23 24
-        Jessica 5 Riverdale vampire_diaries Breaking_Bad Lucifer Lost_in_space 7 8 11 12 15 16 17 18 19 20
+Members File:
+Jack 7 Narcos Lucifer Breaking_Bad Game_of_thrones Teen_wolf Legacies Stranger_things 8 9 12 13 16 17 20 21 22 23 
+BOB 5 Game_of_thrones House_of_the_dragon Teen_wolf Legacies Breaking_Bad 4 5 8 9 10 11 16 17 18 19 20 21
+Tessa 3 Lucifer Narcos Lost_in_space 6 7 12 13 15 16 23 24
+Jessica 5 Riverdale vampire_diaries Breaking_Bad Lucifer Lost_in_space 7 8 11 12 15 16 17 18 19 20
 
     Shows File:
         Breaking_Bad
