@@ -292,27 +292,11 @@ int main()
 
     Family American("Members.txt");
 
-    cout << American.family_members[1].availabilty[0].start_time << endl;
-
     TV_Channel Sony;
     Sony.setdata("Shows.txt", American);
 
-    cout << Sony.show_list[0].name << endl;
-
-    for (auto it = Sony.show_list[0].member_list.begin(); it != Sony.show_list[0].member_list.end(); ++it)
-    {
-        cout << *it << " ";
-    }
-    cout << endl;
-
     Scheduler schedule(American, Sony);
+    schedule.notify(American);
 
-    for (auto it : schedule.Schedule)
-    {
-        cout << it.first << " " << it.second.first << " " << it.second.second << endl;
-    }
-    /*Sony.show_list[1].member_list.pop_front();
-    cout<<Sony.show_list[1].member_list.front();
-    */
     return 0;
 }
