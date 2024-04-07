@@ -114,11 +114,12 @@ class Scheduler
 public:
     multimap<int, pair<string, string>> Schedule;
 
-    Scheduler(Family fam, TV_Channel channel)
+    Scheduler(Family &fam, TV_Channel &channel)
     {
         for (int i = 0; i < 24; i++)
         {
             vector<Member *> free;
+            vector<string> fav_shows;
 
             for (auto &it_member : fam.family_members)
             {
@@ -137,35 +138,86 @@ public:
             }
             else if (free.size() == 1)
             {
+                bool inserted = false;
                 for (auto &it : channel.show_list)
                 {
                     if ((it.member_list.size() == 1) && (it.member_list.front() == free[0]->name))
                     {
                         pair<string, string> data = make_pair(free[0]->name, it.name);
                         Schedule.insert({i, data});
-                        it.member_list.pop_front();
+                        it.member_list.remove(free[0]->name);
                         free[0]->p_copy++;
+                        inserted=true;
                         break;
                     }
                 }
+
+                if(!inserted)
+                {
+                    string fav_s;
+
+                    for(auto &fav : channel.show_list)
+                    {
+                        for(auto &member : fav.member_list)
+                        {
+                            if(member==free[0]->name)
+                            {
+                                fav_s = fav.name;
+                            }
+                        }
+                    }
+
+                    pair<string, string> data = make_pair(free[0]->name, fav_s);
+                    Schedule.insert({i, data});
+                    free[0]->p_copy++;
+                    for(auto &it : channel.show_list)
+                    {
+                        if(it.name==fav_s)
+                        {
+                            it.member_list.remove(free[0]->name);
+                            break;
+                        }
+                    }
+                }
+
             }
             else if (free.size() > 1)
             {
-                /*for(int i=0; i<free.size(); i++)
-                {
-                    int count = 0;
-                    string common;
+                int count = 0;
 
-                    for(auto it : channel.show_list)
+                for (auto &it : channel.show_list)
+                {
+                     count = 0;
+
+                    for (auto &it2 : it.member_list)
                     {
-                        for(auto it2 = it.member_list.begin(); it2!=it.member_list.end(); ++it1)
+                        for (auto check : free)
                         {
-                            if(it2==free[i].name || it1==free)
+                            if (it2 == check->name)
+                            {
+                                count++;
+                                break;
+                            }
+                        }
+                        if (count == free.size())
+                        {
+                            for (auto insert : free)
+                            {
+                                pair<string, string> data = make_pair(insert->name, it.name);
+                                Schedule.insert({i, data});
+                                insert->p_copy++;
+                                it.member_list.remove(insert->name);
+                            }
+                            break;
                         }
                     }
-                }*/
+                    if (count == free.size())
+                    {
+                        break;
+                    }
+                }
+                if(count!=free.size()){
                 Member *temp = free[0];
-
                 for (auto &it2 : free)
                 {
                     if (temp->p_copy >= it2->p_copy)
@@ -195,7 +247,42 @@ public:
                         break;
                     }
                 }
+                }
             }
+        }
+    }
+
+    void notify(Family fam)
+    {
+        for(auto it = Schedule.begin(); it!=Schedule.end(); it++)
+        {
+            if(it->second.second == "\0"){
+                break;
+            }
+
+            cout<<"The Time is: "<<it->first<<":00"<<endl;
+            cout<<it->second.first<<" watch the show "<<it->second.second<<" in your free time"<<endl<<endl;
+            cout<<"************************************************"<<endl<<endl;
+        }
+
+        int check = 0;
+
+        for(auto it : fam.family_members)
+        {
+            if(it.p_copy>p)
+            {
+                check++;
+                continue;
+            }
+            else{
+                cout<<"Every member did not watch "<<p<<" shows today"<<endl;
+                break;
+            }
+        }
+
+        if (check==fam.family_members.size())
+        {
+            cout<<"Every member watched atleast "<<p<<" shows today"<<endl;
         }
     }
 };
